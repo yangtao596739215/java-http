@@ -24,7 +24,7 @@ public class RNListener extends AnalysisEventListener<RNUpdateENtity> {
         System.out.println(rnUpdateENtity);
         System.out.println("**************************************");
 
-        HashMap<String, Object> requestBody = new HashMap<>();
+        HashMap<String, String> requestBody = new HashMap<>();
         requestBody.put("appCode", rnUpdateENtity.getAppCode());
         requestBody.put("minVersion", rnUpdateENtity.getMinVersion());
         requestBody.put("rnBundleVersion", rnUpdateENtity.getVersion());
@@ -32,16 +32,16 @@ public class RNListener extends AnalysisEventListener<RNUpdateENtity> {
         requestBody.put("developerDesc", rnUpdateENtity.getDeveloperDesc());
 
         HashMap<String, String> requestHeader = new HashMap<>();
-        requestHeader.put("Cookie", "d422f79f-8d0f-4d9b-ab57-e0d11d174b80");
-        requestHeader.put("Content-type", "application/json");
-        requestHeader.put("accept", "*/*");
+        requestHeader.put("Cookie", "SESSION=a0415630-3035-4dee-a0f9-2dc148c71456");
+        requestHeader.put("Content-Type", "application/x-www-form-urlencoded");
+        requestHeader.put("Accept", "application/json");
 
-        String result = HttpUtils.sendPost("http://172.16.3.74:8080/ajax/script/rn_bundle/update"
+        String result = HttpUtils.sendPost("http://localhost:8080/ajax/script/rn_bundle/update"
                 , "UTF-8"
                 , requestBody
                 , requestHeader
         );
-        System.out.println(result);
+        System.out.println("返回的返回体中的结果为:"+result);
 
 
     }

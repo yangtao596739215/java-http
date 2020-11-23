@@ -2,12 +2,10 @@ package xyz.duguqiubai.handledata.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +60,6 @@ public class HttpUtils {
         return result;
     }
 
-
     /**
      * 嘎嘎 下面有main方法
      *
@@ -70,12 +67,15 @@ public class HttpUtils {
      * @param charset
      * @return
      */
-    public static String sendPost(String uri, String charset, Map<String, Object> bodyMap, Map<String, String> headerMap) {
-        String result = null;
+    public static String sendPost(String uri, String charset, Map<String, String> bodyMap, Map<String, String> headerMap) {
+
+        StringBuilder result = new StringBuilder();
         PrintWriter out = null;
-        InputStream in = null;
+        BufferedReader br = null;
+
         try {
             URL url = new URL(uri);
+
             HttpURLConnection urlcon = (HttpURLConnection) url.openConnection();
             // 默认是true
             urlcon.setDoInput(true);
@@ -90,33 +90,53 @@ public class HttpUtils {
                 }
             }
 
+            // 构建请求体参数
+            // 构建请求参数
+            StringBuilder sb = new StringBuilder();
+            if (!bodyMap.isEmpty()) {
+                for (Map.Entry<String, String> e : bodyMap.entrySet()) {
+                    sb.append(e.getKey());
+                    sb.append("=");
+                    sb.append(e.getValue());
+                    sb.append("&");
+                }
+            }
+
             // 获取连接
             urlcon.connect();
-
-            // 请求体里的内容转成json用输出流发送到目标地址
             out = new PrintWriter(urlcon.getOutputStream());
-            out.print(objectMapper.writeValueAsString(bodyMap));
+            out.write(sb.toString());
             out.flush();
+            System.out.println("请求的参数为："+sb.toString());
+            System.out.println("返回码为"+urlcon.getResponseCode());
+            System.out.println("返回的信息为"+urlcon.getResponseMessage());
 
-            // 获取返回的数据
-            in = urlcon.getInputStream();
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(in, charset));
-            StringBuffer bs = new StringBuffer();
-            String line = null;
-            while ((line = buffer.readLine()) != null) {
-                bs.append(line);
+            // 这里注意了，正常返回的输入流和错误返回的输入流不是一个,虽然都是从请求体中拿的
+            InputStream is;
+            if (urlcon.getResponseCode() >= 400 ) {
+                is = urlcon.getErrorStream();
+            } else{
+                is = urlcon.getInputStream();
             }
-            result = bs.toString();
-            System.out.println(result);
-
-
+            //取得输入流，并使用Reader读取
+            br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            String line;
+            // readLine()为阻塞方法，会等待服务器的响应，否则会一直等待
+            while ((line = br.readLine()) != null) {
+                result.append(line);
+                System.out.println("line:"+line);
+                result.append("\r\n");
+            }
+            urlcon.disconnect();
         } catch (Exception e) {
             System.out.println("[请求异常][地址：" + uri + "][错误信息：" + e.getMessage() + "]");
             e.printStackTrace();
+
         } finally {
+
             try {
-                if (null != in) {
-                    in.close();
+                if (null != br) {
+                    br.close();
                 }
                 if (null != out) {
                     out.close();
@@ -124,16 +144,16 @@ public class HttpUtils {
             } catch (Exception e2) {
                 System.out.println("[关闭流异常][错误信息：" + e2.getMessage() + "]");
             }
-        }
-        return result;
-    }
 
+        }
+        return result.toString();
+    }
 
     public static void main(String[] args) {
         String uri = "http://172.16.3.74:8080/ajax/script/rn_bundle/update";
         String charset = "UTF-8";
         //请求体设置
-        HashMap<String, Object> bodyMap = new HashMap<>();
+        HashMap<String, String> bodyMap = new HashMap<>();
         bodyMap.put("xxxxxx", "1");
         //请求头设置
         HashMap<String, String> headerMap = new HashMap<>();
