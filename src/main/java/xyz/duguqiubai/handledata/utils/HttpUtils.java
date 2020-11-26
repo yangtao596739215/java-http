@@ -15,51 +15,6 @@ import java.util.Map;
  */
 
 public class HttpUtils {
-
-    // jackson里面用来进行json转换的工具
-    public static ObjectMapper objectMapper = new ObjectMapper();
-
-    /**
-     * 无参数post
-     *
-     * @param uri     地址
-     * @param charset 编码
-     * @return 字符串
-     */
-    public static String sendPost(String uri, String charset) {
-        String result = null;
-        InputStream in = null;
-        try {
-            URL url = new URL(uri);
-            HttpURLConnection urlcon = (HttpURLConnection) url.openConnection();
-            urlcon.setRequestMethod("POST");
-            // 获取连接
-            urlcon.connect();
-            urlcon.setAllowUserInteraction(true);
-
-            // 获取返回的数据
-            in = urlcon.getInputStream();
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(in, charset));
-            StringBuffer bs = new StringBuffer();
-            String line = null;
-            while ((line = buffer.readLine()) != null) {
-                bs.append(line);
-            }
-            result = bs.toString();
-        } catch (Exception e) {
-            System.out.println("[请求异常][地址：" + uri + "][错误信息：" + e.getMessage() + "]");
-        } finally {
-            try {
-                if (null != in) {
-                    in.close();
-                }
-            } catch (Exception e2) {
-                System.out.println("[关闭流异常][错误信息：" + e2.getMessage() + "]");
-            }
-        }
-        return result;
-    }
-
     /**
      * 嘎嘎 下面有main方法
      *
@@ -111,7 +66,7 @@ public class HttpUtils {
             System.out.println("返回码为"+urlcon.getResponseCode());
             System.out.println("返回的信息为"+urlcon.getResponseMessage());
 
-            // 这里注意了，正常返回的输入流和错误返回的输入流不是一个,虽然都是从请求体中拿的
+            // 这里注意了，正常返回的输入流和错误返回的输入流不是一个
             InputStream is;
             if (urlcon.getResponseCode() >= 400 ) {
                 is = urlcon.getErrorStream();
@@ -148,6 +103,7 @@ public class HttpUtils {
         }
         return result.toString();
     }
+
 
     public static void main(String[] args) {
         String uri = "http://172.16.3.74:8080/ajax/script/rn_bundle/update";

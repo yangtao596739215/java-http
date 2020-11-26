@@ -32,11 +32,11 @@ public class RNListener extends AnalysisEventListener<RNUpdateENtity> {
         requestBody.put("developerDesc", rnUpdateENtity.getDeveloperDesc());
 
         HashMap<String, String> requestHeader = new HashMap<>();
-        requestHeader.put("Cookie", "SESSION=a0415630-3035-4dee-a0f9-2dc148c71456");
+        requestHeader.put("Cookie", Varibles.SESSION);
         requestHeader.put("Content-Type", "application/x-www-form-urlencoded");
         requestHeader.put("Accept", "application/json");
 
-        String result = HttpUtils.sendPost("http://localhost:8080/ajax/script/rn_bundle/update"
+        String result = HttpUtils.sendPost(Varibles.rnUpdateURL
                 , "UTF-8"
                 , requestBody
                 , requestHeader
